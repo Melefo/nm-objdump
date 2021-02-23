@@ -8,20 +8,19 @@
 #include <stdio.h>
 #include "nm.h"
 
-bool multiple_files(int argc, char **argv)
+int multiple_files(int argc, char **argv)
 {
-    bool error = false;
+    int error = 0;
 
     for (int i = 1; i < argc; i++)
     {
         if (!file_exists(argv[i]))
         {
-            error = true;
+            error += 1;
             continue;
         }
         printf("\n%s:\n", argv[i]);
-        if (nm(argv[i]))
-            return true;
+        error += nm(argv[i]);
     }
     return error;
 }

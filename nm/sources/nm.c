@@ -9,11 +9,15 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <elf.h>
 #include "nm.h"
 
 bool file_exists(char *file)
 {
     struct stat file_stat;
+
     if (stat(file, &file_stat) == -1)
     {
         fprintf(stderr, "nm: '%s': No such file\n", file);
@@ -24,10 +28,60 @@ bool file_exists(char *file)
         fprintf(stderr, "nm: Warning: '%s' is a directory\n", file);
         return false;
     }
-    return true;
+    return file_stat.st_size > 0;
 }
 
+char *buffer_file(char *file, int *size)
+{
+    int fd = open(file, O_RDONLY);
+    struct stat file_stat;
+    char *buffer;
+
+    if (fd == -1)
+        return NULL;
+    if (fstat(fd, &file_stat) == -1)
+        return NULL;
+    buffer = mmap(NULL, file_stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    close(fd);
+    if (buffer == (void *)-1)
+        return NULL;
+    *size = file_stat.st_size;
+    return buffer;
+}
+
+bool check_header(Elf64_Ehdr *header)
+{
+    if (header->e_ident[EI_MAG0] != ELFMAG0 \
+    || header->e_ident[EI_MAG1] != ELFMAG1 \
+    || header->e_ident[EI_MAG2] != ELFMAG2 \
+    || header->e_ident[EI_MAG3] != ELFMAG3)
+        return true;
+    if (header->e_ident[EI_CLASS] != ELFCLASS64 &&
+    header->e_ident[EI_CLASS] != ELFCLASS32)
+        return true;
+    if (header->e_ident[EI_DATA] != ELFDATA2LSB \
+    && header->e_ident[EI_DATA] != ELFDATA2MSB)
+        return true;
+    if (header->e_ident[EI_VERSION] != EV_CURRENT)
+        return true;
+    if (header->e_ident[EI_ABIVERSION] != 0)
+        return true;
+    return false;
+}
 bool nm(char *file)
 {
-    return false;
+    int fd;
+    int size;
+    char *buffer = buffer_file(file, &size);
+    bool result = false;
+
+    if (buffer == NULL)
+        return true;
+    if (check_header((Elf64_Ehdr *)buffer))
+    {
+        fprintf(stderr, "nm: %s: file format not recognized\n", file);
+        result = true;
+    }
+    munmap(buffer, size);
+    return result;
 }
