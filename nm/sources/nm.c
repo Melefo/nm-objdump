@@ -5,72 +5,48 @@
 ** nm
 */
 
-#include <unistd.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
-#include <fcntl.h>
-#include <elf.h>
+#include <string.h>
 #include "nm.h"
 
-bool file_exists(char *file)
+bool nm_32(Elf32_Ehdr *header)
 {
-    struct stat file_stat;
-
-    if (stat(file, &file_stat) == -1)
-    {
-        fprintf(stderr, "nm: '%s': No such file\n", file);
-        return false;
-    }
-    if (!S_ISREG(file_stat.st_mode))
-    {
-        fprintf(stderr, "nm: Warning: '%s' is a directory\n", file);
-        return false;
-    }
-    return file_stat.st_size > 0;
+    return true;
 }
 
-char *buffer_file(char *file, int *size)
+bool extract_symbols(void *strtab)
 {
-    int fd = open(file, O_RDONLY);
-    struct stat file_stat;
-    char *buffer;
-
-    if (fd == -1)
-        return NULL;
-    if (fstat(fd, &file_stat) == -1)
-        return NULL;
-    buffer = mmap(NULL, file_stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-    close(fd);
-    if (buffer == (void *)-1)
-        return NULL;
-    *size = file_stat.st_size;
-    return buffer;
-}
-
-bool check_header(Elf64_Ehdr *header)
-{
-    if (header->e_ident[EI_MAG0] != ELFMAG0 \
-    || header->e_ident[EI_MAG1] != ELFMAG1 \
-    || header->e_ident[EI_MAG2] != ELFMAG2 \
-    || header->e_ident[EI_MAG3] != ELFMAG3)
-        return true;
-    if (header->e_ident[EI_CLASS] != ELFCLASS64 &&
-    header->e_ident[EI_CLASS] != ELFCLASS32)
-        return true;
-    if (header->e_ident[EI_DATA] != ELFDATA2LSB \
-    && header->e_ident[EI_DATA] != ELFDATA2MSB)
-        return true;
-    if (header->e_ident[EI_VERSION] != EV_CURRENT)
-        return true;
-    if (header->e_ident[EI_ABIVERSION] != 0)
-        return true;
     return false;
 }
+
+bool nm_64(Elf64_Ehdr *header, char *file)
+{
+    Elf64_Shdr *sections = (void *)header + header->e_shoff;
+    char *strtab = (void *)header + sections[header->e_shstrndx].sh_offset;
+
+    if (header->e_shstrndx == SHN_UNDEF)
+    {
+        fprintf(stdout, "nm: %s: no symbols\n", file);
+        return false;
+    }
+    for (int i = 0; i < header->e_shnum; i++)
+    {
+        if (strcmp(strtab + sections[i].sh_name, ".strtab") == 0)
+            return extract_symbols(strtab + sections[i].sh_offset);
+    }
+    return true;
+}
+
+bool nm_arch(Elf64_Ehdr *header, char *file)
+{
+    if (header->e_ident[EI_CLASS] == ELFCLASS64)
+        return nm_64(header, file);
+    return nm_32((Elf32_Ehdr *)header);
+}
+
 bool nm(char *file)
 {
-    int fd;
     int size;
     char *buffer = buffer_file(file, &size);
     bool result = false;
@@ -82,6 +58,7 @@ bool nm(char *file)
         fprintf(stderr, "nm: %s: file format not recognized\n", file);
         result = true;
     }
+    result = nm_arch((Elf64_Ehdr *)buffer, file);
     munmap(buffer, size);
     return result;
 }

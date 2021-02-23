@@ -6,7 +6,8 @@
 ##
 
 SRC		=	sources/main.c	\
-			sources/nm.c
+			sources/nm.c	\
+			sources/handler.c
 
 OBJ		=	$(SRC:%.c=%.o)
 
