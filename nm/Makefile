@@ -6,6 +6,7 @@
 ##
 
 SRC		=	sources/main.c	\
+			sources/nm.c
 
 OBJ		=	$(SRC:%.c=%.o)
 
@@ -26,6 +27,9 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	$(CC) -o $(NAME) $(OBJ) $(CFLAGS)
 
+dbg: CFLAGS += -g
+dbg: re
+
 tests_run:
 	$(CC) -o unit_tests $(TEST) $(COVERAGE) $(CFLAGS)
 	./unit_tests
@@ -40,4 +44,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: re fclean clean all tests_run
+.PHONY: re fclean clean all tests_run dbg

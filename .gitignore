@@ -1,0 +1,6 @@
+*unit_tests*
+*.gc*
+*.o
+.vscode/
+my_nm
+my_objdump
