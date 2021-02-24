@@ -15,15 +15,34 @@ bool nm_32(Elf32_Ehdr *header)
     return true;
 }
 
-bool extract_symbols(void *strtab)
+bool extract_symbols(Elf64_Ehdr *header, char *strtab)
 {
+    Elf64_Shdr *sections = (void *)header + header->e_shoff;
+
+    for (int i = 0; i < header->e_shnum; i++)
+    {
+        Elf64_Sym *symtable = (void *)header + sections[i].sh_offset;
+
+        if (sections[i].sh_type != SHT_SYMTAB)
+            continue;
+        for (Elf64_Xword j = 0; j < sections[i].sh_size / sections[i].sh_entsize; j++)
+        {
+            if (!strtab[symtable[j].st_name])
+                continue;
+            if (symtable[i].st_value)
+                printf("%06lx %c %s\n", symtable[j].st_value, '?', &strtab[symtable[j].st_name]);
+            else
+                printf("%10c %s\n", '?', &strtab[symtable[j].st_name]);
+        }
+    }
     return false;
 }
 
 bool nm_64(Elf64_Ehdr *header, char *file)
 {
     Elf64_Shdr *sections = (void *)header + header->e_shoff;
-    char *strtab = (void *)header + sections[header->e_shstrndx].sh_offset;
+    char *shstrtab = (void *)header + sections[header->e_shstrndx].sh_offset;
+    bool result = true;
 
     if (header->e_shstrndx == SHN_UNDEF)
     {
@@ -32,10 +51,10 @@ bool nm_64(Elf64_Ehdr *header, char *file)
     }
     for (int i = 0; i < header->e_shnum; i++)
     {
-        if (strcmp(strtab + sections[i].sh_name, ".strtab") == 0)
-            return extract_symbols(strtab + sections[i].sh_offset);
+        if (strcmp(shstrtab + sections[i].sh_name, ".strtab") == 0)
+            result = extract_symbols(header, (void *)header + sections[i].sh_offset);
     }
-    return true;
+    return result;
 }
 
 bool nm_arch(Elf64_Ehdr *header, char *file)
