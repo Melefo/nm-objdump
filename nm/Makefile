@@ -5,9 +5,10 @@
 ## Makefile
 ##
 
-SRC		=	sources/main.c	\
-			sources/nm.c	\
-			sources/handler.c
+SRC		=	sources/main.c		\
+			sources/nm.c		\
+			sources/handler.c	\
+			sources/symbols.c
 
 OBJ		=	$(SRC:%.c=%.o)
 
