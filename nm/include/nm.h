@@ -12,6 +12,12 @@
 #include <stdbool.h>
 #include <elf.h>
 
+typedef struct node {
+    Elf64_Sym *symbol;
+    char *strtab;
+    struct node *next;
+} node_t;
+
 bool nm(char *);
 bool nm_arch(Elf64_Ehdr *header, char *file);
 
@@ -19,6 +25,11 @@ bool file_exists(char *file);
 char *buffer_file(char *file, int *size);
 bool check_header(Elf64_Ehdr *header);
 
-bool extract_symbols(Elf64_Ehdr *header, char *strtab);
+node_t *extract_symbols(Elf64_Ehdr *header, char *strtab);
+void print_symbols(node_t *list, Elf64_Ehdr *elf);
+
+void append_node(node_t **list, node_t *node);
+node_t *create_node(Elf64_Sym *symbol, char *strtab);
+void sort_list(node_t *list);
 
 #endif /* !NM_H_ */

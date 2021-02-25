@@ -23,6 +23,7 @@ char sym_type_spec(Elf64_Sym *sym, Elf64_Ehdr *ehdr)
     return '?';
 }
 
+// 'G' ? 'i' ? 'I' ? 'n' ? 'p' ? 'S' ? 'u' ? '-' ?
 char sym_type(Elf64_Sym *sym, Elf64_Ehdr *ehdr)
 {
     Elf64_Shdr *shdr = (void *)ehdr + ehdr->e_shoff;
@@ -42,24 +43,34 @@ char sym_type(Elf64_Sym *sym, Elf64_Ehdr *ehdr)
         return ELF64_ST_BIND(sym->st_info) == STB_GLOBAL ? 'T' : 't';
     if (ELF64_ST_BIND(sym->st_info) == STB_WEAK)
         return ELF64_ST_BIND(sym->st_info) == STB_GLOBAL ? 'W' : 'w';
-    // 'G' ? 'i' ? 'I' ? 'n' ? 'p' ? 'S' ? 'u' ? '-' ?
     return sym_type_spec(sym, ehdr);
 }
 
-void print_sym(char *strtab, Elf64_Sym *sym, Elf64_Ehdr *elf)
+void print_symbols(node_t *list, Elf64_Ehdr *elf)
 {
-    char *name = &strtab[sym->st_name];
-    if (name[0] == '\0')
-        return;
-    if (sym->st_value)
-        printf("%016lx %c %s\n", sym->st_value, sym_type(sym, elf), name);
-    else
-        printf("%18c %s\n", sym_type(sym, elf), name);
+    while (list)
+    {
+        Elf64_Sym *sym = list->symbol;
+        char *strtab = list->strtab;
+        char *name = &strtab[sym->st_name];
+
+        if (name[0] == '\0')
+        {
+            list = list->next;
+            continue;
+        }
+        if (sym->st_value)
+            printf("%016lx %c %s\n", sym->st_value, sym_type(sym, elf), name);
+        else
+            printf("%18c %s\n", sym_type(sym, elf), name);
+        list = list->next;
+    }
 }
 
-bool extract_symbols(Elf64_Ehdr *header, char *strtab)
+node_t *extract_symbols(Elf64_Ehdr *header, char *strtab)
 {
     Elf64_Shdr *sections = (void *)header + header->e_shoff;
+    node_t *list = NULL;
 
     for (int i = 0; i < header->e_shnum; i++)
     {
@@ -71,7 +82,7 @@ bool extract_symbols(Elf64_Ehdr *header, char *strtab)
         symtable = (void *)header + sections[i].sh_offset;
         max = sections[i].sh_size / sections[i].sh_entsize;
         for (Elf64_Xword j = 0; j < max; j++)
-            print_sym(strtab, &symtable[j], header);
+            append_node(&list, create_node(&symtable[j], strtab));
     }
-    return false;
+    return list;
 }

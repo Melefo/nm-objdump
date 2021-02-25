@@ -15,12 +15,12 @@ bool nm_32(Elf32_Ehdr *header)
     return true;
 }
 
-
 bool nm_64(Elf64_Ehdr *ehdr, char *file)
 {
-    Elf64_Shdr *shdr = (void *)ehdr + ehdr->e_shoff;
-    char *shstrtab = (void *)ehdr + shdr[ehdr->e_shstrndx].sh_offset;
-    bool result = true;
+    void *addr = ehdr;
+    Elf64_Shdr *shdr = addr + ehdr->e_shoff;
+    char *shstrtab = addr + shdr[ehdr->e_shstrndx].sh_offset;
+    node_t *list = NULL;
 
     if (ehdr->e_shstrndx == SHN_UNDEF)
     {
@@ -31,9 +31,11 @@ bool nm_64(Elf64_Ehdr *ehdr, char *file)
     {
         if (strcmp(shstrtab + shdr[i].sh_name, ".strtab"))
             continue;
-        result = extract_symbols(ehdr, (void *)ehdr + shdr[i].sh_offset);
+        append_node(&list, extract_symbols(ehdr, addr + shdr[i].sh_offset));
     }
-    return result;
+    sort_list(list);
+    print_symbols(list, ehdr);
+    return list == NULL;
 }
 
 bool nm_arch(Elf64_Ehdr *header, char *file)
