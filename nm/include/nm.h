@@ -19,4 +19,6 @@ bool file_exists(char *file);
 char *buffer_file(char *file, int *size);
 bool check_header(Elf64_Ehdr *header);
 
+bool extract_symbols(Elf64_Ehdr *header, char *strtab);
+
 #endif /* !NM_H_ */
