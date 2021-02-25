@@ -18,6 +18,12 @@ typedef struct node {
     struct node *next;
 } node_t;
 
+typedef struct type {
+    char c;
+    Elf64_Word type;
+    Elf64_Xword flags;
+} type_t;
+
 bool nm(char *);
 bool nm_arch(Elf64_Ehdr *header, char *file);
 

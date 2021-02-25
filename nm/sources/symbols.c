@@ -9,41 +9,47 @@
 #include <string.h>
 #include "nm.h"
 
-char sym_type_spec(Elf64_Sym *sym, Elf64_Ehdr *ehdr)
-{
-    Elf64_Shdr *shdr = (void *)ehdr + ehdr->e_shoff;
-    char *shstrtab = (void *)ehdr + shdr[ehdr->e_shstrndx].sh_offset;
+static type_t types[] = {
+    {'B', SHT_NOBITS, SHF_ALLOC | SHF_WRITE},
+    {'D', SHT_PROGBITS, SHF_ALLOC | SHF_WRITE},
+    {'D', SHT_DYNAMIC, SHF_ALLOC | SHF_WRITE},
+    {'D', SHT_INIT_ARRAY, SHF_ALLOC | SHF_WRITE},
+    {'D', SHT_FINI_ARRAY, SHF_ALLOC | SHF_WRITE},
+    {'N', SHT_PROGBITS, 0},
+    {'R', SHT_PROGBITS, SHF_ALLOC},
+    {'T', SHT_PROGBITS, SHF_ALLOC | SHF_EXECINSTR},
+    {'\0', 0, 0}
+};
 
-    if (ELF64_ST_TYPE(sym->st_info) == STT_COMMON)
-        return 'C';
-    if (strcmp(shstrtab + shdr[sym->st_shndx].sh_name, ".debug") == 0)
-        return 'N';
-    if (sym->st_shndx == SHN_UNDEF)
-        return 'U';
-    return '?';
+char type_weak(Elf64_Sym *sym)
+{
+    if (ELF64_ST_TYPE(sym->st_info) == STT_OBJECT)
+        return sym->st_shndx == SHN_UNDEF ? 'v' : 'V';
+    return sym->st_shndx == SHN_UNDEF ? 'w' : 'W';
 }
 
-// 'G' ? 'i' ? 'I' ? 'n' ? 'p' ? 'S' ? 'u' ? '-' ?
 char sym_type(Elf64_Sym *sym, Elf64_Ehdr *ehdr)
 {
     Elf64_Shdr *shdr = (void *)ehdr + ehdr->e_shoff;
-    char *shstrtab = (void *)ehdr + shdr[ehdr->e_shstrndx].sh_offset;
+    char result = '?';
 
-    if (sym->st_shndx == SHN_ABS)
-        return ELF64_ST_BIND(sym->st_info) == STB_GLOBAL ? 'A' : 'a';
-    if (strcmp(shstrtab + shdr[sym->st_shndx].sh_name, ".bss") == 0)
-        return ELF64_ST_BIND(sym->st_info) == STB_GLOBAL ? 'B' : 'b';
-    if (strcmp(shstrtab + shdr[sym->st_shndx].sh_name, ".data") == 0 \
-    || strcmp(shstrtab + shdr[sym->st_shndx].sh_name, ".data1") == 0)
-        return ELF64_ST_BIND(sym->st_info) == STB_GLOBAL ? 'D' : 'd';
-    if (strcmp(shstrtab + shdr[sym->st_shndx].sh_name, ".rodata") == 0 \
-    || strcmp(shstrtab + shdr[sym->st_shndx].sh_name, ".rodata1") == 0)
-        return ELF64_ST_BIND(sym->st_info) == STB_GLOBAL ? 'R' : 'r';
-    if (strcmp(shstrtab + shdr[sym->st_shndx].sh_name, ".text") == 0)
-        return ELF64_ST_BIND(sym->st_info) == STB_GLOBAL ? 'T' : 't';
+    if (sym->st_shndx == SHN_COMMON)
+        return 'C';
+    if (ELF64_ST_BIND(sym->st_info) == STB_GNU_UNIQUE)
+        return 'u';
+    if (sym->st_shndx == SHN_UNDEF)
+        result = 'U';
+    for (int i = 0; types[i].c && result == '?'; i++)
+        if (shdr[sym->st_shndx].sh_type == types[i].type \
+        && shdr[sym->st_shndx].sh_flags == types[i].flags)
+            result = types[i].c;
     if (ELF64_ST_BIND(sym->st_info) == STB_WEAK)
-        return ELF64_ST_BIND(sym->st_info) == STB_GLOBAL ? 'W' : 'w';
-    return sym_type_spec(sym, ehdr);
+        return type_weak(sym);
+    if (sym->st_shndx == SHN_ABS)
+        result = 'A';
+    if (ELF64_ST_BIND(sym->st_info) == STB_LOCAL && result != '?')
+        result += 'a' - 'A';
+    return result;
 }
 
 void print_symbols(node_t *list, Elf64_Ehdr *elf)
@@ -54,7 +60,7 @@ void print_symbols(node_t *list, Elf64_Ehdr *elf)
         char *strtab = list->strtab;
         char *name = &strtab[sym->st_name];
 
-        if (name[0] == '\0')
+        if (name[0] == '\0' || sym->st_info == STT_FILE)
         {
             list = list->next;
             continue;
