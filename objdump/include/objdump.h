@@ -19,4 +19,6 @@ bool check_header(Elf64_Ehdr *header);
 
 void print_header(Elf64_Ehdr *header, char *file);
 
+void print_sections(Elf64_Ehdr *header);
+
 #endif /* !OBJDUMP_H_ */

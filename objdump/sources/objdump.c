@@ -18,6 +18,7 @@ bool objdump_32(Elf32_Ehdr *header)
 bool objdump_64(Elf64_Ehdr *header, char *file)
 {
     print_header(header, file);
+    print_sections(header);
     return false;
 }
 
