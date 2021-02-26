@@ -7,7 +7,8 @@
 
 SRC		=	sources/main.c		\
 			sources/objdump.c	\
-			sources/handler.c
+			sources/handler.c	\
+			sources/header.c
 
 OBJ		=	$(SRC:%.c=%.o)
 
@@ -27,6 +28,9 @@ all: $(NAME)
 
 $(NAME): $(OBJ)
 	$(CC) -o $(NAME) $(OBJ) $(CFLAGS)
+
+dbg: CFLAGS += -g
+dbg: re
 
 tests_run:
 	$(CC) -o unit_tests $(TEST) $(COVERAGE) $(CFLAGS)

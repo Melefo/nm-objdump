@@ -19,7 +19,7 @@ bool multiple_files(int argc, char **argv)
             error += 1;
             continue;
         }
-        printf("\n%s:\n", argv[i]);
+        printf("\n");
         if (objdump(argv[i]))
             error = true;
     }
