@@ -5,7 +5,9 @@
 ## Makefile
 ##
 
-SRC		=	sources/main.c	\
+SRC		=	sources/main.c		\
+			sources/objdump.c	\
+			sources/handler.c
 
 OBJ		=	$(SRC:%.c=%.o)
 
