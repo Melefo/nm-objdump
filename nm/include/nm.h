@@ -34,8 +34,14 @@ bool check_header(Elf64_Ehdr *header);
 node_t *extract_symbols(Elf64_Ehdr *header, char *strtab);
 void print_symbols(node_t *list, Elf64_Ehdr *elf);
 
+node_t *extract_symbols32(Elf32_Ehdr *header, char *strtab);
+void print_symbols32(node_t *list, Elf32_Ehdr *elf);
+
 void append_node(node_t **list, node_t *node);
 node_t *create_node(Elf64_Sym *symbol, char *strtab);
 void sort_list(node_t *list);
+
+node_t *create_node32(Elf32_Sym *symbol, char *strtab);
+void sort_list32(node_t *list);
 
 #endif /* !NM_H_ */

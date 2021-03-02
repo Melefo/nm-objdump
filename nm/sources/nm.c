@@ -10,9 +10,27 @@
 #include <string.h>
 #include "nm.h"
 
-bool nm_32(Elf32_Ehdr *header)
+bool nm_32(Elf32_Ehdr *ehdr, char *file)
 {
-    return true;
+    void *addr = ehdr;
+    Elf32_Shdr *shdr = addr + ehdr->e_shoff;
+    char *shstrtab = addr + shdr[ehdr->e_shstrndx].sh_offset;
+    node_t *list = NULL;
+
+    if (ehdr->e_shstrndx == SHN_UNDEF)
+    {
+        fprintf(stdout, "nm: %s: no symbols\n", file);
+        return false;
+    }
+    for (int i = 0; i < ehdr->e_shnum; i++)
+    {
+        if (strcmp(shstrtab + shdr[i].sh_name, ".strtab"))
+            continue;
+        append_node(&list, extract_symbols32(ehdr, addr + shdr[i].sh_offset));
+    }
+    sort_list32(list);
+    print_symbols32(list, ehdr);
+    return list == NULL;
 }
 
 bool nm_64(Elf64_Ehdr *ehdr, char *file)
@@ -42,7 +60,7 @@ bool nm_arch(Elf64_Ehdr *header, char *file)
 {
     if (header->e_ident[EI_CLASS] == ELFCLASS64)
         return nm_64(header, file);
-    return nm_32((Elf32_Ehdr *)header);
+    return nm_32((Elf32_Ehdr *)header, file);
 }
 
 bool nm(char *file)

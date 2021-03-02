@@ -9,7 +9,9 @@ SRC		=	sources/main.c		\
 			sources/nm.c		\
 			sources/handler.c	\
 			sources/symbols.c	\
-			sources/list.c
+			sources/list.c		\
+			sources/symbols32.c	\
+			sources/list32.c	\
 
 OBJ		=	$(SRC:%.c=%.o)
 
