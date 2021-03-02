@@ -45,12 +45,13 @@ bool blacklist_section(char *name)
     return false;
 }
 
-void print_sections(Elf64_Ehdr *header)
+void print_sections(Elf64_Ehdr *ehdr)
 {
-    Elf64_Shdr *shdr = (void *)header + header->e_shoff;
-    char *shstrtab = (void *)header + shdr[header->e_shstrndx].sh_offset;
+    Elf64_Shdr *shdr = (void *)ehdr + ehdr->e_shoff;
+    char *shstrtab = (void *)ehdr + shdr[ehdr->e_shstrndx].sh_offset;
+    void *ptr = ehdr;
 
-    for (int i = 0; i < header->e_shnum; i++)
+    for (int i = 0; i < ehdr->e_shnum; i++)
     {
         if (blacklist_section(shstrtab + shdr[i].sh_name))
             continue;
@@ -58,7 +59,27 @@ void print_sections(Elf64_Ehdr *header)
         for (Elf64_Xword j = 0; j < shdr[i].sh_size; j += 16)
         {
             printf(" %04lx ", shdr[i].sh_addr + j);
-            print_data((void *)header + shdr[i].sh_offset + j, shdr[i].sh_size - j);
+            print_data(ptr + shdr[i].sh_offset + j, shdr[i].sh_size - j);
+            printf("\n");
+        }
+    }
+}
+
+void print_sections32(Elf32_Ehdr *ehdr)
+{
+    Elf32_Shdr *shdr = (void *)ehdr + ehdr->e_shoff;
+    char *shstrtab = (void *)ehdr + shdr[ehdr->e_shstrndx].sh_offset;
+    void *ptr = ehdr;
+
+    for (int i = 0; i < ehdr->e_shnum; i++)
+    {
+        if (blacklist_section(shstrtab + shdr[i].sh_name))
+            continue;
+        printf("Contents of section %s:\n", shstrtab + shdr[i].sh_name);
+        for (Elf32_Xword j = 0; j < shdr[i].sh_size; j += 16)
+        {
+            printf(" %04lx ", shdr[i].sh_addr + j);
+            print_data(ptr + shdr[i].sh_offset + j, shdr[i].sh_size - j);
             printf("\n");
         }
     }

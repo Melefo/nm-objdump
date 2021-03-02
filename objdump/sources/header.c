@@ -23,9 +23,9 @@ static flag_t flags[] = {
     {NULL, 0}
 };
 
-char *str_arch(Elf64_Ehdr *header)
+char *str_arch(header_t header)
 {
-    switch (header->e_machine)
+    switch (header.e_machine)
     {
     case EM_X86_64:
         return "i386:x86-64";
@@ -50,14 +50,14 @@ void print_flags(Elf64_Word flag)
     }
 }
 
-void print_header(Elf64_Ehdr *ehdr, char *file)
+void print_header(header_t ehdr, char *file)
 {
     printf("%s:     ", file);
-    if (ehdr->e_ident[EI_CLASS] == ELFCLASS64)
+    if (ehdr.e_ident[EI_CLASS] == ELFCLASS64)
         printf("file format elf64-x86-64\n");
     else
         printf("file format elf32-i386\n");
-    printf("architecture: %s, flags 0x%08x:\n", str_arch(ehdr), ehdr->e_flags);
-    print_flags(ehdr->e_flags);
-    printf("\nstart address 0x%016lx\n\n", ehdr->e_entry);
+    printf("architecture: %s, flags 0x%08x:\n", str_arch(ehdr), ehdr.e_flags);
+    print_flags(ehdr.e_flags);
+    printf("\nstart address 0x%016lx\n\n", ehdr.e_entry);
 }

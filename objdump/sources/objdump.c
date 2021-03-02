@@ -10,15 +10,31 @@
 #include <stdio.h>
 #include "objdump.h"
 
-bool objdump_32(Elf32_Ehdr *header)
+bool objdump_32(Elf32_Ehdr *ehdr, char *file)
 {
-    return true;
+    header_t header = {
+        ehdr->e_ident,
+        ehdr->e_machine,
+        ehdr->e_flags,
+        ehdr->e_entry
+    };
+
+    print_header(header, file);
+    print_sections32(ehdr);
+    return false;
 }
 
-bool objdump_64(Elf64_Ehdr *header, char *file)
+bool objdump_64(Elf64_Ehdr *ehdr, char *file)
 {
+    header_t header = {
+        ehdr->e_ident,
+        ehdr->e_machine,
+        ehdr->e_flags,
+        ehdr->e_entry
+    };
+
     print_header(header, file);
-    print_sections(header);
+    print_sections(ehdr);
     return false;
 }
 
@@ -26,7 +42,7 @@ bool objdump_arch(Elf64_Ehdr *header, char *file)
 {
     if (header->e_ident[EI_CLASS] == ELFCLASS64)
         return objdump_64(header, file);
-    return objdump_32((Elf32_Ehdr *)header);
+    return objdump_32((Elf32_Ehdr *)header, file);
 }
 
 bool objdump(char *file)
