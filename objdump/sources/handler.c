@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include "objdump.h"
 
-char *buffer_file(char *file, int *size)
+char *buffer_file(char *file, size_t *size)
 {
     int fd = open(file, O_RDONLY);
     struct stat file_stat;

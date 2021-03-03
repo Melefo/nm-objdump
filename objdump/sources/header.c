@@ -23,9 +23,9 @@ static flag_t flags[] = {
     {NULL, 0}
 };
 
-char *str_arch(header_t header)
+char *arch(Elf64_Half machine)
 {
-    switch (header.e_machine)
+    switch (machine)
     {
     case EM_X86_64:
         return "i386:x86-64";
@@ -36,11 +36,52 @@ char *str_arch(header_t header)
     }
 }
 
-void print_flags(Elf64_Word flag)
+size_t find_flags(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr)
+{
+	size_t flag = 0;
+
+	if (ehdr->e_type == ET_EXEC)
+        flag |= EXEC_P | D_PAGED;
+	if (ehdr->e_type == ET_DYN)
+		flag |= DYNAMIC | D_PAGED;
+    if (ehdr->e_type == ET_REL)
+		flag |= HAS_RELOC;
+    for (int i = 0; i < ehdr->e_shnum; i++)
+    {
+        if (shdr[i].sh_type == SHT_SYMTAB)
+            flag |= HAS_SYMS;
+    }
+	return (flag);
+}
+
+size_t find_flags32(Elf32_Ehdr *ehdr, Elf32_Shdr *shdr)
+{
+	size_t flag = 0;
+
+	if (ehdr->e_type == ET_EXEC)
+        flag |= EXEC_P | D_PAGED;
+	if (ehdr->e_type == ET_DYN)
+		flag |= DYNAMIC | D_PAGED;
+    if (ehdr->e_type == ET_REL)
+		flag |= HAS_RELOC;
+    for (int i = 0; i < ehdr->e_shnum; i++)
+    {
+        if (shdr[i].sh_type == SHT_SYMTAB)
+            flag |= HAS_SYMS;
+    }
+	return (flag);
+}
+
+void print_flags(size_t flag)
 {
     char *separator = "";
 
-    for (int i = 0; flags[i].str != NULL; i++)
+    if (flag == flags[0].flag)
+    {
+        printf("%s", flags[0].str);
+        return;
+    }
+    for (int i = 1; flags[i].str != NULL; i++)
     {
         if (flag & flags[i].flag)
         {
@@ -50,14 +91,26 @@ void print_flags(Elf64_Word flag)
     }
 }
 
-void print_header(header_t ehdr, char *file)
+void print_header(Elf64_Ehdr *ehdr, char *file)
 {
+    Elf32_Ehdr *ehdr32 = (Elf32_Ehdr *)ehdr;
+    size_t flag = 0;
+
     printf("%s:     ", file);
-    if (ehdr.e_ident[EI_CLASS] == ELFCLASS64)
+    if (ehdr->e_ident[EI_CLASS] == ELFCLASS64)
+    {
+        flag = find_flags(ehdr, (void *)ehdr + ehdr->e_shoff);
         printf("file format elf64-x86-64\n");
+    }
     else
+    {
+        flag = find_flags32(ehdr32, (void *)ehdr32 + ehdr32->e_shoff);
         printf("file format elf32-i386\n");
-    printf("architecture: %s, flags 0x%08x:\n", str_arch(ehdr), ehdr.e_flags);
-    print_flags(ehdr.e_flags);
-    printf("\nstart address 0x%016lx\n\n", ehdr.e_entry);
+    }
+    printf("architecture: %s, flags 0x%08lx:\n", arch(ehdr->e_machine), flag);
+    print_flags(flag);
+    if (ehdr->e_ident[EI_CLASS] == ELFCLASS64)
+        printf("\nstart address 0x%016lx\n\n", ehdr->e_entry);
+    else
+        printf("\nstart address 0x%08x\n\n", ehdr32->e_entry);
 }

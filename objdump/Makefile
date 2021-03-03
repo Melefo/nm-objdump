@@ -16,7 +16,7 @@ SRC		=	sources/objdump.c	\
 
 OBJ		=	$(SRC:%.c=%.o)
 
-TEST	=	\
+TEST	=	tests/tests_handler.c	\
 
 NAME	=	my_objdump
 
