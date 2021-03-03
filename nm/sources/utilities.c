@@ -11,7 +11,7 @@ bool check_size(Elf64_Ehdr *ehdr, Elf64_Shdr **shdr, char **tab, size_t size)
 {
     void *addr = ehdr;
 
-    if (size < ehdr->e_shoff)
+    if (size < ehdr->e_shoff + sizeof(Elf64_Shdr) * ehdr->e_shnum)
         return true;
     *shdr = addr + ehdr->e_shoff;
     if (size < (*shdr)[ehdr->e_shstrndx].sh_offset)
@@ -24,7 +24,7 @@ bool check_size32(Elf32_Ehdr *ehdr, Elf32_Shdr **shdr, char **tab, size_t size)
 {
     void *addr = ehdr;
 
-    if (size < ehdr->e_shoff)
+    if (size < ehdr->e_shoff + sizeof(Elf32_Shdr) * ehdr->e_shnum)
         return true;
     *shdr = addr + ehdr->e_shoff;
     if (size < (*shdr)[ehdr->e_shstrndx].sh_offset)
