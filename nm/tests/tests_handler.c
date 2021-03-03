@@ -44,42 +44,60 @@ Test(buffer_file, fd)
 
 Test(check_header, correct)
 {
-    Elf64_Ehdr ehdr = {{0x7F, 'E', 'L', 'F', 2, 1, 1, 0, 0}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Elf64_Ehdr ehdr = {
+        {0x7F, 'E', 'L', 'F', 2, 1, 1, 0, 0},
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
 
     cr_assert(!check_header(&ehdr));
 }
 
 Test(check_header, magic)
 {
-    Elf64_Ehdr ehdr = {{0x7F, 'N', 'O', 'P', 2, 1, 1, 0, 0}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Elf64_Ehdr ehdr = {
+        {0x7F, 'N', 'O', 'P', 2, 1, 1, 0, 0},
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
 
     cr_assert(check_header(&ehdr));
 }
 
 Test(check_header, class)
 {
-    Elf64_Ehdr ehdr = {{0x7F, 'E', 'L', 'F', 0, 1, 1, 0, 0}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Elf64_Ehdr ehdr = {
+        {0x7F, 'E', 'L', 'F', 0, 1, 1, 0, 0},
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
 
     cr_assert(check_header(&ehdr));
 }
 
 Test(check_header, data)
 {
-    Elf64_Ehdr ehdr = {{0x7F, 'E', 'L', 'F', 2, 0, 1, 0, 0}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Elf64_Ehdr ehdr = {
+        {0x7F, 'E', 'L', 'F', 2, 0, 1, 0, 0},
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
 
     cr_assert(check_header(&ehdr));
 }
 
 Test(check_header, version)
 {
-    Elf64_Ehdr ehdr = {{0x7F, 'E', 'L', 'F', 2, 1, 0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Elf64_Ehdr ehdr = {
+        {0x7F, 'E', 'L', 'F', 2, 1, 0, 0, 0},
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
 
     cr_assert(check_header(&ehdr));
 }
 
 Test(check_header, abi)
 {
-    Elf64_Ehdr ehdr = {{0x7F, 'E', 'L', 'F', 2, 1, 1, 0, 1}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Elf64_Ehdr ehdr = {
+        {0x7F, 'E', 'L', 'F', 2, 1, 1, 0, 1},
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
 
     cr_assert(check_header(&ehdr));
 }

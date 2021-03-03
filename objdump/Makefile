@@ -5,8 +5,11 @@
 ## Makefile
 ##
 
-SRC		=	sources/main.c		\
-			sources/objdump.c	\
+MAIN	=	sources/main.c
+
+MOBJ		=	$(MAIN:%.c=%.o)
+
+SRC		=	sources/objdump.c	\
 			sources/handler.c	\
 			sources/header.c	\
 			sources/sections.c
@@ -27,14 +30,14 @@ COVERAGE=	--coverage -lcriterion
 
 all: $(NAME)
 
-$(NAME): $(OBJ)
-	$(CC) -o $(NAME) $(OBJ) $(CFLAGS)
+$(NAME): $(MOBJ) $(OBJ)
+	$(CC) -o $(NAME) $(MOBJ) $(OBJ) $(CFLAGS)
 
 dbg: CFLAGS += -g
 dbg: re
 
 tests_run:
-	$(CC) -o unit_tests $(TEST) $(COVERAGE) $(CFLAGS)
+	$(CC) -o unit_tests $(SRC) $(TEST) $(COVERAGE) $(CFLAGS)
 	./unit_tests
 
 clean:

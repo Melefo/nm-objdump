@@ -33,5 +33,7 @@ fclean:
 re:
 	make re -C nm/
 	make re -C objdump/
+	$(MV) nm/my_nm .
+	$(MV) objdump/my_objdump .
 
 .PHONY: re fclean clean all tests_run nm objdump

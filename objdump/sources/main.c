@@ -10,13 +10,13 @@
 
 bool multiple_files(int argc, char **argv)
 {
-    int error = false;
+    bool error = false;
 
     for (int i = 1; i < argc; i++)
     {
         if (!file_exists(argv[i]))
         {
-            error += 1;
+            error = true;
             continue;
         }
         printf("\n");
