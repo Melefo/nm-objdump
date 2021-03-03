@@ -40,6 +40,7 @@ void print_symbols32(node_t *list, Elf32_Ehdr *elf);
 void append_node(node_t **list, node_t *node);
 node_t *create_node(Elf64_Sym *symbol, char *strtab);
 void sort_list(node_t *list);
+size_t size_list(node_t *list);
 
 node_t *create_node32(Elf32_Sym *symbol, char *strtab);
 void sort_list32(node_t *list);
