@@ -74,7 +74,7 @@ bool nm(char *file)
     if (check_header((Elf64_Ehdr *)buffer))
     {
         fprintf(stderr, "nm: %s: file format not recognized\n", file);
-        result = true;
+        return true;
     }
     result = nm_arch((Elf64_Ehdr *)buffer, file);
     munmap(buffer, size);

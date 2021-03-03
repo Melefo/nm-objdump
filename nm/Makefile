@@ -20,7 +20,8 @@ OBJ		=	$(SRC:%.c=%.o)
 
 TEST	=	tests/tests_handler.c	\
 			tests/tests_list.c		\
-			tests/tests_list32.c
+			tests/tests_list32.c	\
+			tests/tests_nm.c
 
 NAME	=	my_nm
 
