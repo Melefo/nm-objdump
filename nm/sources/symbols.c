@@ -65,7 +65,7 @@ void print_symbols(node_t *list, Elf64_Ehdr *elf)
             list = list->next;
             continue;
         }
-        if (sym->st_value)
+        if (sym->st_shndx != SHN_UNDEF)
             printf("%016lx %c %s\n", sym->st_value, sym_type(sym, elf), name);
         else
             printf("%18c %s\n", sym_type(sym, elf), name);
