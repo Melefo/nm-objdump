@@ -10,13 +10,15 @@
 #include <string.h>
 #include "nm.h"
 
-bool nm_32(Elf32_Ehdr *ehdr, char *file)
+bool nm_32(Elf32_Ehdr *ehdr, char *file, size_t size)
 {
     void *addr = ehdr;
-    Elf32_Shdr *shdr = addr + ehdr->e_shoff;
-    char *shstrtab = addr + shdr[ehdr->e_shstrndx].sh_offset;
+    Elf32_Shdr *shdr = NULL;
+    char *shstrtab = NULL;
     node_t *list = NULL;
 
+    if (check_size32(ehdr, &shdr, &shstrtab, size))
+        return true;
     if (ehdr->e_shstrndx == SHN_UNDEF)
     {
         fprintf(stdout, "nm: %s: no symbols\n", file);
@@ -33,13 +35,15 @@ bool nm_32(Elf32_Ehdr *ehdr, char *file)
     return list == NULL;
 }
 
-bool nm_64(Elf64_Ehdr *ehdr, char *file)
+bool nm_64(Elf64_Ehdr *ehdr, char *file, size_t size)
 {
     void *addr = ehdr;
-    Elf64_Shdr *shdr = addr + ehdr->e_shoff;
-    char *shstrtab = addr + shdr[ehdr->e_shstrndx].sh_offset;
+    Elf64_Shdr *shdr = NULL;
+    char *shstrtab = NULL;
     node_t *list = NULL;
 
+    if (check_size(ehdr, &shdr, &shstrtab, size))
+        return true;
     if (ehdr->e_shstrndx == SHN_UNDEF)
     {
         fprintf(stdout, "nm: %s: no symbols\n", file);
@@ -56,16 +60,16 @@ bool nm_64(Elf64_Ehdr *ehdr, char *file)
     return list == NULL;
 }
 
-bool nm_arch(Elf64_Ehdr *header, char *file)
+bool nm_arch(Elf64_Ehdr *header, char *file, size_t size)
 {
     if (header->e_ident[EI_CLASS] == ELFCLASS64)
-        return nm_64(header, file);
-    return nm_32((Elf32_Ehdr *)header, file);
+        return nm_64(header, file, size);
+    return nm_32((Elf32_Ehdr *)header, file, size);
 }
 
 bool nm(char *file)
 {
-    int size;
+    size_t size;
     char *buffer = buffer_file(file, &size);
     bool result = false;
 
@@ -76,7 +80,7 @@ bool nm(char *file)
         fprintf(stderr, "nm: %s: file format not recognized\n", file);
         return true;
     }
-    result = nm_arch((Elf64_Ehdr *)buffer, file);
+    result = nm_arch((Elf64_Ehdr *)buffer, file, size);
     munmap(buffer, size);
     return result;
 }

@@ -28,7 +28,7 @@ Test(file_exists, directory, .init = cr_redirect_stderr)
 
 Test(buffer_file, map)
 {
-    int size = 0;
+    size_t size = 0;
 
     cr_assert_not_null(buffer_file("tests/tests_handler.c", &size));
     cr_assert(size > 0);
@@ -36,7 +36,7 @@ Test(buffer_file, map)
 
 Test(buffer_file, fd)
 {
-    int size = 0;
+    size_t size = 0;
 
     cr_assert_null(buffer_file("test", &size));
     cr_assert_eq(size, 0);

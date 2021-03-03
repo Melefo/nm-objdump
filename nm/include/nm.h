@@ -25,10 +25,10 @@ typedef struct type {
 } type_t;
 
 bool nm(char *);
-bool nm_arch(Elf64_Ehdr *header, char *file);
+bool nm_arch(Elf64_Ehdr *header, char *file, size_t size);
 
 bool file_exists(char *file);
-char *buffer_file(char *file, int *size);
+char *buffer_file(char *file, size_t *size);
 bool check_header(Elf64_Ehdr *header);
 
 node_t *extract_symbols(Elf64_Ehdr *header, char *strtab);
@@ -44,5 +44,8 @@ size_t size_list(node_t *list);
 
 node_t *create_node32(Elf32_Sym *symbol, char *strtab);
 void sort_list32(node_t *list);
+
+bool check_size(Elf64_Ehdr *ehdr, Elf64_Shdr **shdr, char **tab, size_t);
+bool check_size32(Elf32_Ehdr *ehdr, Elf32_Shdr **shdr, char **tab, size_t);
 
 #endif /* !NM_H_ */
