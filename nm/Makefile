@@ -5,8 +5,11 @@
 ## Makefile
 ##
 
-SRC		=	sources/main.c		\
-			sources/nm.c		\
+MAIN	=	sources/main.c
+
+MOBJ	=	$(MAIN:%.c=%.o)
+
+SRC		=	sources/nm.c		\
 			sources/handler.c	\
 			sources/symbols.c	\
 			sources/list.c		\
@@ -15,7 +18,7 @@ SRC		=	sources/main.c		\
 
 OBJ		=	$(SRC:%.c=%.o)
 
-TEST	=	\
+TEST	=	tests/tests_handler.c	\
 
 NAME	=	my_nm
 
@@ -29,18 +32,19 @@ COVERAGE=	--coverage -lcriterion
 
 all: $(NAME)
 
-$(NAME): $(OBJ)
-	$(CC) -o $(NAME) $(OBJ) $(CFLAGS)
+$(NAME): $(MOBJ) $(OBJ)
+	$(CC) -o $(NAME) $(MOBJ) $(OBJ) $(CFLAGS)
 
 dbg: CFLAGS += -g
 dbg: re
 
 tests_run:
-	$(CC) -o unit_tests $(TEST) $(COVERAGE) $(CFLAGS)
+	$(CC) -o unit_tests $(SRC) $(TEST) $(COVERAGE) $(CFLAGS)
 	./unit_tests
 
 clean:
 	$(RM) $(OBJ)
+	$(RM) $(MOBJ)
 
 fclean: clean
 	$(RM) $(NAME)
