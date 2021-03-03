@@ -18,6 +18,10 @@ char *buffer_file(char *file, size_t *size);
 bool check_header(Elf64_Ehdr *header);
 
 void print_header(Elf64_Ehdr *header, char *file);
+char *arch(Elf64_Half machine);
+size_t find_flags(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr);
+size_t find_flags32(Elf32_Ehdr *ehdr, Elf32_Shdr *shdr);
+void print_flags(size_t flag);
 
 void print_sections(Elf64_Ehdr *header);
 void print_sections32(Elf32_Ehdr *header);
