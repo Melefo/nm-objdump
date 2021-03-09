@@ -25,51 +25,47 @@ static flag_t flags[] = {
 
 char *arch(Elf64_Half machine)
 {
-    switch (machine)
-    {
-    case EM_X86_64:
+    if (machine == EM_X86_64)
         return "i386:x86-64";
-    case EM_386:
+    if (machine == EM_386)
         return "i386";
-    default:
-        return "UNKNOWN!";
-    }
+    return "UNKNOWN!";
 }
 
 size_t find_flags(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr)
 {
-	size_t flag = 0;
+    size_t flag = 0;
 
-	if (ehdr->e_type == ET_EXEC)
+    if (ehdr->e_type == ET_EXEC)
         flag |= EXEC_P | D_PAGED;
-	if (ehdr->e_type == ET_DYN)
-		flag |= DYNAMIC | D_PAGED;
+    if (ehdr->e_type == ET_DYN)
+        flag |= DYNAMIC | D_PAGED;
     if (ehdr->e_type == ET_REL)
-		flag |= HAS_RELOC;
+        flag |= HAS_RELOC;
     for (int i = 0; i < ehdr->e_shnum; i++)
     {
         if (shdr[i].sh_type == SHT_SYMTAB)
             flag |= HAS_SYMS;
     }
-	return (flag);
+    return (flag);
 }
 
 size_t find_flags32(Elf32_Ehdr *ehdr, Elf32_Shdr *shdr)
 {
-	size_t flag = 0;
+    size_t flag = 0;
 
-	if (ehdr->e_type == ET_EXEC)
+    if (ehdr->e_type == ET_EXEC)
         flag |= EXEC_P | D_PAGED;
-	if (ehdr->e_type == ET_DYN)
-		flag |= DYNAMIC | D_PAGED;
+    if (ehdr->e_type == ET_DYN)
+        flag |= DYNAMIC | D_PAGED;
     if (ehdr->e_type == ET_REL)
-		flag |= HAS_RELOC;
+        flag |= HAS_RELOC;
     for (int i = 0; i < ehdr->e_shnum; i++)
     {
         if (shdr[i].sh_type == SHT_SYMTAB)
             flag |= HAS_SYMS;
     }
-	return (flag);
+    return (flag);
 }
 
 void print_flags(size_t flag)

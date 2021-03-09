@@ -38,8 +38,8 @@ bool check_header(Elf64_Ehdr *header)
     || header->e_ident[EI_MAG2] != ELFMAG2 \
     || header->e_ident[EI_MAG3] != ELFMAG3)
         return true;
-    if (header->e_ident[EI_CLASS] != ELFCLASS64 &&
-    header->e_ident[EI_CLASS] != ELFCLASS32)
+    if (header->e_ident[EI_CLASS] != ELFCLASS64 \
+    && header->e_ident[EI_CLASS] != ELFCLASS32)
         return true;
     if (header->e_ident[EI_DATA] != ELFDATA2LSB \
     && header->e_ident[EI_DATA] != ELFDATA2MSB)
