@@ -26,7 +26,7 @@ void print_data(unsigned char *data, Elf64_Xword size)
         if (i < size)
             printf("%c", (data[i] >= ' ' && data[i] <= '~') ? data[i] : '.');
         else
-            printf("  ");
+            printf(" ");
     }
 }
 
@@ -45,6 +45,19 @@ bool blacklist_section(char *name)
     return false;
 }
 
+int padding(Elf64_Xword n)
+{
+    int nbr = 0;
+
+    while (n != 0) {
+        n /= 16;
+        nbr += 1;
+    }
+    if (nbr < 4)
+        return 4;
+    return nbr;
+}
+
 void print_sections(Elf64_Ehdr *ehdr)
 {
     Elf64_Shdr *shdr = (void *)ehdr + ehdr->e_shoff;
@@ -58,7 +71,7 @@ void print_sections(Elf64_Ehdr *ehdr)
         printf("Contents of section %s:\n", shstrtab + shdr[i].sh_name);
         for (Elf64_Xword j = 0; j < shdr[i].sh_size; j += 16)
         {
-            printf(" %04lx ", shdr[i].sh_addr + j);
+            printf(" %0*lx ", padding(shdr[i].sh_size), shdr[i].sh_addr + j);
             print_data(ptr + shdr[i].sh_offset + j, shdr[i].sh_size - j);
             printf("\n");
         }
@@ -78,7 +91,7 @@ void print_sections32(Elf32_Ehdr *ehdr)
         printf("Contents of section %s:\n", shstrtab + shdr[i].sh_name);
         for (Elf32_Xword j = 0; j < shdr[i].sh_size; j += 16)
         {
-            printf(" %04lx ", shdr[i].sh_addr + j);
+            printf(" %0*lx ", padding(shdr[i].sh_size), shdr[i].sh_addr + j);
             print_data(ptr + shdr[i].sh_offset + j, shdr[i].sh_size - j);
             printf("\n");
         }
