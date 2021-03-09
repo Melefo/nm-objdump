@@ -10,6 +10,12 @@
 #include <string.h>
 #include "nm.h"
 
+bool no_symbol(char *file)
+{
+    fprintf(stderr, "nm: %s: no symbols\n", file);
+    return false;
+}
+
 bool nm_32(Elf32_Ehdr *ehdr, char *file, size_t size)
 {
     void *addr = ehdr;
@@ -20,10 +26,7 @@ bool nm_32(Elf32_Ehdr *ehdr, char *file, size_t size)
     if (check_size32(ehdr, &shdr, &shstrtab, size))
         return true;
     if (ehdr->e_shstrndx == SHN_UNDEF)
-    {
-        fprintf(stdout, "nm: %s: no symbols\n", file);
-        return false;
-    }
+        return no_symbol(file);
     for (int i = 0; i < ehdr->e_shnum; i++)
     {
         if (strcmp(shstrtab + shdr[i].sh_name, ".strtab"))
@@ -32,7 +35,9 @@ bool nm_32(Elf32_Ehdr *ehdr, char *file, size_t size)
     }
     sort_list32(list);
     print_symbols32(list, ehdr);
-    return list == NULL;
+    if (list == NULL)
+        return no_symbol(file);
+    return false;
 }
 
 bool nm_64(Elf64_Ehdr *ehdr, char *file, size_t size)
@@ -45,10 +50,7 @@ bool nm_64(Elf64_Ehdr *ehdr, char *file, size_t size)
     if (check_size(ehdr, &shdr, &shstrtab, size))
         return true;
     if (ehdr->e_shstrndx == SHN_UNDEF)
-    {
-        fprintf(stdout, "nm: %s: no symbols\n", file);
-        return false;
-    }
+        return no_symbol(file);
     for (int i = 0; i < ehdr->e_shnum; i++)
     {
         if (strcmp(shstrtab + shdr[i].sh_name, ".strtab"))
@@ -57,8 +59,9 @@ bool nm_64(Elf64_Ehdr *ehdr, char *file, size_t size)
     }
     sort_list(list);
     print_symbols(list, ehdr);
-    return list == NULL;
-}
+    if (list == NULL)
+        return no_symbol(file);
+    return false;}
 
 bool nm_arch(Elf64_Ehdr *header, char *file, size_t size)
 {
