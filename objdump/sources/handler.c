@@ -46,8 +46,6 @@ bool check_header(Elf64_Ehdr *header)
         return true;
     if (header->e_ident[EI_VERSION] != EV_CURRENT)
         return true;
-    if (header->e_ident[EI_ABIVERSION] != 0)
-        return true;
     return false;
 }
 
