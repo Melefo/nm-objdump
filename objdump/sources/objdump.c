@@ -38,20 +38,22 @@ bool check_size32(Elf32_Ehdr *ehdr, size_t size)
 
 bool objdump_arch(Elf64_Ehdr *header, char *file, size_t size)
 {
-    print_header(header, file);
+    bool error = false;
 
     if (header->e_ident[EI_CLASS] == ELFCLASS64)
-    {
-        if (check_size(header, size))
-            return true;
-        print_sections(header);
-    }
+        error = check_size(header, size);
     else
+        error = check_size32((Elf32_Ehdr *)header, size);
+    if (error)
     {
-        if (check_size32((Elf32_Ehdr *)header, size))
-            return true;
-        print_sections32((Elf32_Ehdr *)header);
+        fprintf(stderr, "objdump: %s: file format not recognized\n", file);
+        return true;
     }
+    print_header(header, file);
+    if (header->e_ident[EI_CLASS] == ELFCLASS64)
+        print_sections(header);
+    else
+        print_sections32((Elf32_Ehdr *)header);
     return false;
 }
 
