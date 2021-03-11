@@ -27,8 +27,11 @@ void cmp_nodes32(node_t *node1, node_t *node2)
     char *strtab = node1->strtab;
     Elf32_Sym *sym2 = (Elf32_Sym *)node2->symbol;
     char *strtab2 = node2->strtab;
+    int result = strcmp(&strtab[sym->st_name], &strtab2[sym2->st_name]);
 
-    if (strcmp(&strtab[sym->st_name], &strtab2[sym2->st_name]) <= 0)
+    if (result < 0)
+        return;
+    if (result == 0 && sym->st_value < sym2->st_value)
         return;
     node1->strtab = strtab2;
     node1->symbol = (Elf64_Sym *)sym2;

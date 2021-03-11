@@ -79,6 +79,8 @@ bool nm(char *file)
 
     if (buffer == NULL)
         return true;
+    if (strncmp(buffer, ARMAG, SARMAG) == 0)
+        return nm_ar(buffer + SARMAG, file, size);
     if (check_header((Elf64_Ehdr *)buffer))
     {
         fprintf(stderr, "nm: %s: file format not recognized\n", file);

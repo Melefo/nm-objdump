@@ -15,7 +15,8 @@ SRC		=	sources/nm.c		\
 			sources/list.c		\
 			sources/symbols32.c	\
 			sources/list32.c	\
-			sources/utilities.c
+			sources/utilities.c	\
+			sources/ar.c
 
 OBJ		=	$(SRC:%.c=%.o)
 

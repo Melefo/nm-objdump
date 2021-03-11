@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <elf.h>
+#include <ar.h>
 
 typedef struct node {
     Elf64_Sym *symbol;
@@ -47,5 +48,7 @@ void sort_list32(node_t *list);
 
 bool check_size(Elf64_Ehdr *ehdr, Elf64_Shdr **shdr, char **tab, size_t);
 bool check_size32(Elf32_Ehdr *ehdr, Elf32_Shdr **shdr, char **tab, size_t);
+
+bool nm_ar(void *ptr, char *file, size_t size);
 
 #endif /* !NM_H_ */
