@@ -9,9 +9,12 @@
 #define OBJDUMP_H_
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <elf.h>
+#include <ar.h>
 
 bool objdump(char *file);
+bool objdump_arch(Elf64_Ehdr *header, char *file, size_t size);
 
 bool file_exists(char *file);
 char *buffer_file(char *file, size_t *size);
@@ -25,5 +28,7 @@ void print_flags(size_t flag);
 
 void print_sections(Elf64_Ehdr *header);
 void print_sections32(Elf32_Ehdr *header);
+
+bool objdump_ar(void *ptr, char *file, size_t size);
 
 #endif /* !OBJDUMP_H_ */

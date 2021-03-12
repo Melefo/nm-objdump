@@ -30,9 +30,11 @@ void print_data(unsigned char *data, Elf64_Xword size)
     }
 }
 
-bool blacklist_section(char *name)
+bool blacklist_section(char *name, size_t size)
 {
     if (name[0] == '\0')
+        return true;
+    if (size == 0)
         return true;
     if (strcmp(name, ".shstrtab") == 0)
         return true;
@@ -41,6 +43,8 @@ bool blacklist_section(char *name)
     if (strcmp(name, ".symtab") == 0)
         return true;
     if (strcmp(name, ".bss") == 0)
+        return true;
+    if (strncmp(name, ".rela.", 6) == 0)
         return true;
     return false;
 }
@@ -66,7 +70,7 @@ void print_sections(Elf64_Ehdr *ehdr)
 
     for (int i = 0; i < ehdr->e_shnum; i++)
     {
-        if (blacklist_section(shstrtab + shdr[i].sh_name))
+        if (blacklist_section(shstrtab + shdr[i].sh_name, shdr[i].sh_size))
             continue;
         printf("Contents of section %s:\n", shstrtab + shdr[i].sh_name);
         for (Elf64_Xword j = 0; j < shdr[i].sh_size; j += 16)
@@ -86,7 +90,7 @@ void print_sections32(Elf32_Ehdr *ehdr)
 
     for (int i = 0; i < ehdr->e_shnum; i++)
     {
-        if (blacklist_section(shstrtab + shdr[i].sh_name))
+        if (blacklist_section(shstrtab + shdr[i].sh_name, shdr[i].sh_size))
             continue;
         printf("Contents of section %s:\n", shstrtab + shdr[i].sh_name);
         for (Elf32_Xword j = 0; j < shdr[i].sh_size; j += 16)

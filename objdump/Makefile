@@ -12,7 +12,8 @@ MOBJ		=	$(MAIN:%.c=%.o)
 SRC		=	sources/objdump.c	\
 			sources/handler.c	\
 			sources/header.c	\
-			sources/sections.c
+			sources/sections.c	\
+			sources/ar.c
 
 OBJ		=	$(SRC:%.c=%.o)
 
