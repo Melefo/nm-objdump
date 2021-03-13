@@ -44,7 +44,9 @@ bool blacklist_section(char *name, size_t size)
         return true;
     if (strcmp(name, ".bss") == 0)
         return true;
-    if (strncmp(name, ".rela.", 6) == 0)
+    if (strcmp(name, ".rela.eh_frame") == 0)
+        return true;
+    if (strcmp(name, ".rela.text") == 0)
         return true;
     return false;
 }
