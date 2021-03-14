@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "nm.h"
 
 static type_t types[] = {
@@ -59,10 +60,12 @@ void print_symbols32(node_t *list, Elf32_Ehdr *elf)
         Elf32_Sym *sym = (Elf32_Sym *)list->symbol;
         char *strtab = list->strtab;
         char *name = &strtab[sym->st_name];
+        node_t *to_free = list;
 
         if (name[0] == '\0' || sym->st_info == STT_FILE)
         {
             list = list->next;
+            free(to_free);
             continue;
         }
         if (sym->st_value)
@@ -70,6 +73,7 @@ void print_symbols32(node_t *list, Elf32_Ehdr *elf)
         else
             printf("%10c %s\n", sym_type32(sym, elf), name);
         list = list->next;
+        free(to_free);
     }
 }
 
